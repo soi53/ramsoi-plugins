@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla Slide Demo</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    .presentation-viewport {
+      width: 100vw; height: 100vh; height: 100dvh;
+      display: flex; justify-content: center; align-items: center;
+      background: #0f0f1a; overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .slide-deck {
+      aspect-ratio: 16 / 9; max-width: 100%; max-height: 100%; width: 100%;
+      background: #1a1a2e; display: grid; grid-template: 1fr / 1fr;
+      container-type: size; container-name: deck;
+      box-shadow: 0 0 80px rgba(0,0,0,.5); overflow: hidden; position: relative;
+    }
+    @media (min-aspect-ratio: 16/9) { .slide-deck { width: auto; height: 100%; } }
+    .slide {
+      grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: center;
+      padding: 6% 8%; color: #e0e0e0; font-size: clamp(0.7rem, 2.2cqi, 1.5rem);
+      opacity: 0; visibility: hidden; pointer-events: none;
+    }
+    .slide.active { opacity: 1; visibility: visible; pointer-events: auto; }
+    .slide.transition-ready { transition: transform 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.6s ease; }
+    .slide.leaving-forward   { transform: translateX(-100%); opacity: 0; }
+    .slide.leaving-backward  { transform: translateX(100%);  opacity: 0; }
+    .slide.entering-forward  { transform: translateX(100%);  opacity: 0; visibility: visible; }
+    .slide.entering-backward { transform: translateX(-100%); opacity: 0; visibility: visible; }
+    .slide.entering-forward.animating, .slide.entering-backward.animating { transform: translateX(0); opacity: 1; }
+    .slide__title { font-size: 3em; font-weight: 800; line-height: 1.2;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .slide__subtitle { font-size: 1.4em; color: #888; margin-top: 0.4em; }
+    .slide__body { flex: 1; font-size: 1.4em; line-height: 1.8; display: flex; flex-direction: column; justify-content: center; }
+    .slide__body ul { padding-left: 1.5em; }
+    .slide__body li { margin-bottom: 0.5em; }
+    .progress-bar { position:absolute; bottom:0; left:0; width:100%; height:4px; background:rgba(255,255,255,.05); z-index:100; }
+    .progress-bar__fill { height:100%; transform:scaleX(0); transform-origin:left; transition:transform .3s ease; background:linear-gradient(90deg,#667eea,#764ba2); }
+    .slide-counter { position:absolute; bottom:14px; right:20px; font-size:.8em; color:rgba(255,255,255,.3); z-index:100; user-select:none; }
+    .speaker-notes { display: none !important; }
+    #notes-panel { position:absolute; bottom:0; left:0; right:0; max-height:0; overflow:hidden;
+      background:rgba(15,15,26,.95); color:#ccc; transition:max-height .3s ease, padding .3s ease;
+      z-index:200; font-size:.9em; padding:0 20px; border-top:2px solid transparent; backdrop-filter:blur(10px); }
+    #notes-panel.open { max-height:30%; padding:16px 20px; border-top-color:#667eea; }
+    .notes-label { font-size:.7em; text-transform:uppercase; letter-spacing:2px; color:#667eea; margin-bottom:8px; }
+    @media (prefers-reduced-motion: reduce) { .slide { transition-duration: 0.01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="presentation-viewport">
+    <main class="slide-deck" role="region" aria-label="프레젠테이션" aria-live="polite">
+      <section class="slide active" data-slide="0" aria-roledescription="slide">
+        <div class="slide__header" style="text-align:center">
+          <h1 class="slide__title" style="font-size:3.5em">Vanilla Slide Engine</h1>
+          <p class="slide__subtitle">순수 HTML / CSS / JavaScript 프레젠테이션</p>
+        </div>
+        <div class="slide__body" style="align-items:center; color:#666; font-size:1.1em">
+          <p>외부 라이브러리 없이 구현된 풀 기능 프레젠테이션</p>
+          <p style="margin-top:1em; font-size:.85em">← → 키 또는 스와이프로 이동 | S: 노트 | F: 전체화면</p>
+        </div>
+        <aside class="speaker-notes">오프닝 슬라이드입니다.</aside>
+      </section>
+      <section class="slide" data-slide="1" aria-roledescription="slide">
+        <div class="slide__header"><h2 class="slide__title">핵심 기능</h2></div>
+        <div class="slide__body">
+          <ul>
+            <li>16:9 비율 고정 + 자동 레터박스</li>
+            <li>슬라이드 전환 애니메이션 (GPU 가속)</li>
+            <li>키보드 / 터치 / 스와이프 네비게이션</li>
+            <li>URL Hash 동기화 + 딥링크</li>
+            <li>화자 노트 + 프로그레스 바</li>
+          </ul>
+        </div>
+        <aside class="speaker-notes">각 기능을 설명하세요.</aside>
+      </section>
+      <section class="slide" data-slide="2" aria-roledescription="slide">
+        <div class="slide__header" style="text-align:center">
+          <h2 class="slide__title" style="font-size:3em">Thank You</h2>
+        </div>
+        <div class="slide__body" style="align-items:center; text-align:center; color:#888">
+          <p style="font-size:1.2em">단일 HTML 파일 | 외부 의존성: 0</p>
+        </div>
+        <aside class="speaker-notes">마무리 슬라이드입니다.</aside>
+      </section>
+      <div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+      <div class="slide-counter"><span id="counterCurrent">1</span> / <span id="counterTotal">3</span></div>
+      <div id="notes-panel"><div class="notes-label">Speaker Notes (S)</div><div id="notes-content"></div></div>
+    </main>
+  </div>
+<script>
+class SlideEngine {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.total = this.slides.length;
+    this.current = 0;
+    this.isAnimating = false;
+    this._init();
+  }
+  _init() {
+    this._bindKeyboard(); this._bindSwipe(); this._loadFromHash(); this._updateUI();
+    window.addEventListener('popstate', () => this._loadFromHash());
+  }
+  next() { if (!this.isAnimating) this._goTo(this.current + 1, 'forward'); }
+  prev() { if (!this.isAnimating) this._goTo(this.current - 1, 'backward'); }
+  async _goTo(target, dir) {
+    if (target < 0 || target >= this.total || this.isAnimating) return;
+    this.isAnimating = true;
+    const cur = this.slides[this.current], nxt = this.slides[target];
+    cur.style.willChange = nxt.style.willChange = 'transform, opacity';
+    nxt.classList.add(`entering-${dir}`);
+    void nxt.offsetHeight;
+    cur.classList.add('transition-ready'); nxt.classList.add('transition-ready');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      cur.classList.add(`leaving-${dir}`); nxt.classList.add('animating');
+    }));
+    await new Promise(resolve => {
+      const h = e => { if (e.target !== nxt || e.propertyName !== 'transform') return;
+        nxt.removeEventListener('transitionend', h); clearTimeout(t); resolve(); };
+      nxt.addEventListener('transitionend', h);
+      const t = setTimeout(() => { nxt.removeEventListener('transitionend', h); resolve(); }, 800);
+    });
+    cur.classList.remove('active', 'transition-ready', `leaving-${dir}`);
+    cur.style.willChange = 'auto';
+    nxt.classList.remove('transition-ready', `entering-${dir}`, 'animating');
+    nxt.classList.add('active'); nxt.style.willChange = 'auto';
+    this.current = target; this._updateUI(); this._syncHash(); this.isAnimating = false;
+  }
+  _bindKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+      if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowDown': case 'PageDown': e.preventDefault(); this.next(); break;
+        case 'ArrowLeft': case 'ArrowUp': case 'PageUp': e.preventDefault(); this.prev(); break;
+        case ' ': e.preventDefault(); e.shiftKey ? this.prev() : this.next(); break;
+        case 'Home': e.preventDefault(); this._goTo(0, 'backward'); break;
+        case 'End': e.preventDefault(); this._goTo(this.total-1, 'forward'); break;
+        case 'f': case 'F': document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.(); break;
+        case 's': case 'S': document.getElementById('notes-panel').classList.toggle('open'); this._updateNotes(); break;
+        case 'Escape': document.getElementById('notes-panel').classList.remove('open'); break;
+      }
+    });
+  }
+  _bindSwipe() {
+    let sx=0, sy=0, st=0;
+    document.addEventListener('pointerdown', e => { if (e.pointerType==='mouse'&&e.button!==0) return; sx=e.clientX; sy=e.clientY; st=Date.now(); });
+    document.addEventListener('pointerup', e => {
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      if (Date.now()-st>400||Math.abs(dx)<Math.abs(dy)||Math.abs(dx)<50) return;
+      dx<0 ? this.next() : this.prev();
+    });
+  }
+  _syncHash() { const h=`#slide-${this.current+1}`; if (location.hash!==h) history.pushState({slide:this.current},'',h); }
+  _loadFromHash() {
+    const m=location.hash.match(/^#slide-(\d+)$/);
+    if (!m) return;
+    const idx=parseInt(m[1],10)-1;
+    if (idx>=0&&idx<this.total&&idx!==this.current) {
+      this.slides[this.current].classList.remove('active');
+      this.slides[idx].classList.add('active');
+      this.current=idx; this._updateUI();
+    }
+  }
+  _updateUI() {
+    const p=this.total>1?this.current/(this.total-1):0;
+    document.getElementById('progressFill').style.transform=`scaleX(${p})`;
+    document.getElementById('counterCurrent').textContent=this.current+1;
+    document.getElementById('counterTotal').textContent=this.total;
+    this._updateNotes();
+  }
+  _updateNotes() {
+    const aside=this.slides[this.current].querySelector('.speaker-notes');
+    document.getElementById('notes-content').textContent=aside?.textContent?.trim()||'(노트 없음)';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { window.presentation = new SlideEngine(); });
+</script>
+</body>
+</html>

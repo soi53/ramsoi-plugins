@@ -1,0 +1,8 @@
+{
+  "name": "vanilla-slide-presentation",
+  "description": "Build a complete, single-file HTML/CSS/JS slide presentation without any external libraries. Supports arrow key navigation, fullscreen, slide counter, smooth transitions, and speaker notes.",
+  "author": {
+    "name": "ramsoi",
+    "email": "ihopeihave@gmail.com"
+  }
+}
