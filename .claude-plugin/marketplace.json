@@ -1,0 +1,11 @@
+{
+  "name": "ramsoi-plugins",
+  "description": "Personal Claude Code plugin marketplace by ramsoi",
+  "plugins": [
+    {
+      "name": "vanilla-slide-presentation",
+      "path": "plugins/vanilla-slide-presentation",
+      "description": "Build a complete, single-file HTML/CSS/JS slide presentation without any external libraries. Supports arrow key navigation, fullscreen, slide counter, and smooth transitions."
+    }
+  ]
+}
